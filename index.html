@@ -12,6 +12,10 @@
     <!-- Gerçek Harita Motoru (Leaflet) -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- Online Ortak Veritabanı (Firebase Realtime Database) -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
     
     <style>
         :root {
@@ -105,18 +109,25 @@
         .add-action-btn { background: linear-gradient(45deg, rgba(255,0,85,0.2), transparent); border: 1px solid var(--primary); color: #fff; padding: 5px 12px; border-radius: 10px; font-size: 0.8rem; cursor: pointer; transition: 0.3s; font-weight:600; box-shadow: 0 0 8px rgba(255,0,85,0.2);}
         .add-action-btn:active { background: var(--primary); box-shadow: 0 0 15px var(--primary); }
 
-        /* HARİTA ALANI */
+        /* HARİTA ALANI - Sıcak, illüstratif "gezi haritası" çerçevesi */
+        .map-frame {
+            flex: 1; width: 100%; min-height: 0; position: relative;
+            border-radius: 22px; padding: 5px;
+            background: linear-gradient(135deg, #fff3cf 0%, #d9a441 55%, #fff3cf 100%);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.6), 0 0 15px rgba(255,0,85,0.2);
+        }
         #map-container { 
-            flex: 1; width: 100%; height: auto; min-height: 0; 
-            border-radius: 14px; overflow: hidden; 
-            border: 2px solid rgba(255, 0, 85, 0.4); 
-            box-shadow: 0 8px 25px rgba(0,0,0,0.6), 0 0 15px rgba(255,0,85,0.15); 
+            width: 100%; height: 100%;
+            border-radius: 17px; overflow: hidden; 
+            border: 2px solid rgba(255,255,255,0.55); 
             z-index: 1; background: #eef2e6;
         }
+        .map-compass { position: absolute; top: 10px; right: 12px; font-size: 1.3rem; z-index: 999; pointer-events: none; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6)); opacity: 0.92; }
         
-        .leaflet-tile { filter: saturate(2.2) contrast(1.15) brightness(1.02); }
-        .custom-pin { background: #fff; border: 3px solid var(--primary); border-radius: 50%; box-shadow: 0 0 10px var(--primary); animation: pulsePin 1.5s infinite; cursor: pointer; }
-        @keyframes pulsePin { 0% { box-shadow: 0 0 0 0 rgba(255,0,85,0.9); } 70% { box-shadow: 0 0 0 12px rgba(255,0,85,0); } 100% { box-shadow: 0 0 0 0 rgba(255,0,85,0); } }
+        .leaflet-tile { filter: saturate(1.55) contrast(1.05) brightness(1.05); }
+        .cute-pin-wrap { background: transparent !important; border: none !important; }
+        .cute-pin { cursor: pointer; animation: pinGlow 1.7s ease-in-out infinite; transform-origin: bottom center; }
+        @keyframes pinGlow { 0%, 100% { filter: drop-shadow(0 2px 3px rgba(0,0,0,0.45)) drop-shadow(0 0 3px rgba(255,0,85,0.8)); transform: scale(1); } 50% { filter: drop-shadow(0 2px 3px rgba(0,0,0,0.45)) drop-shadow(0 0 9px rgba(255,0,85,1)); transform: scale(1.08); } }
         
         .neon-route-thin { stroke-dasharray: 6 10; animation: dashAnim 20s linear infinite; filter: drop-shadow(0 0 3px #ff0055); }
         @keyframes dashAnim { to { stroke-dashoffset: -500; } }
@@ -224,7 +235,10 @@
                         <h2><i class="fas fa-map-marked-alt"></i> Gittiğimiz Yerler</h2>
                         <div class="add-action-btn" onclick="openModal('map')"><i class="fas fa-plus"></i> Yer Ekle</div>
                     </div>
-                    <div id="map-container"></div>
+                    <div class="map-frame">
+                        <div class="map-compass">🧭</div>
+                        <div id="map-container"></div>
+                    </div>
                 </div>
 
                 <!-- FİLMLER -->
@@ -338,24 +352,29 @@
         });
 
         // ==========================================
-        // OTOMATİK ORTAK BULUT ODA MOTORU (DETERMINISTIC UUID)
+        // ONLINE ORTAK VERİTABANI MOTORU (Firebase Realtime Database)
         // ==========================================
-        let loveDB = { movies: [], notes: [], places: [] };
+        // !!! KURULUM GEREKLİ !!! Aşağıdaki FIREBASE_CONFIG içine kendi Firebase ayarlarını yapıştır.
+        // Nasıl alınır (ücretsiz, ~5 dk):
+        // 1) console.firebase.google.com -> Proje oluştur
+        // 2) Sol menü -> Build -> Realtime Database -> "Veritabanı oluştur" -> bir bölge seç -> "Test modunda başlat"
+        // 3) Database ekranında "Rules" sekmesi -> içeriği şununla değiştirip Yayınla'ya bas:
+        //      { "rules": { ".read": true, ".write": true } }
+        // 4) Sol üstte dişli ikonu -> Proje ayarları -> "Genel" sekmesi -> aşağıda "Uygulamalarınız" -> </> (Web) simgesi
+        //    -> bir isim ver -> Kaydet. Sana bir "firebaseConfig" nesnesi verecek, onu aşağıya olduğu gibi yapıştır.
+        const FIREBASE_CONFIG = {
+            apiKey: "BURAYA_YAPISTIR",
+            authDomain: "BURAYA_YAPISTIR.firebaseapp.com",
+            databaseURL: "https://BURAYA_YAPISTIR-default-rtdb.firebaseio.com",
+            projectId: "BURAYA_YAPISTIR",
+            storageBucket: "BURAYA_YAPISTIR.appspot.com",
+            messagingSenderId: "BURAYA_YAPISTIR",
+            appId: "BURAYA_YAPISTIR"
+        };
+
+        let loveDB = { movies: [], notes: [], places: [], startDate: null };
         let mapInstance = null; let routeLayers = null; let mapMarkers = L.layerGroup(); let isDrawingMap = false;
-        
-        // Bu sabit string sayesinde ikiniz de her zaman aynı bulut veritabanına bağlanırsınız
-        function getDeterministicBlobId(str) {
-            let hash = 0;
-            for (let i = 0; i < str.length; i++) {
-                hash = ((hash << 5) - hash) + str.charCodeAt(i);
-                hash |= 0;
-            }
-            let h = Math.abs(hash).toString(16);
-            while(h.length < 32) h += h;
-            return `${h.substr(0,8)}-${h.substr(8,4)}-4${h.substr(12,3)}-a${h.substr(15,3)}-${h.substr(18,12)}`;
-        }
-        
-        const cloudId = getDeterministicBlobId("nazli-ve-alperen-sonsuz-dunyAMIZ-2026-sabit-oda");
+        let loveRef = null; let firstSnapshotHandled = false;
 
         const defaultPlaces = [
             { name: "Pırlanta Plajı", lat: 38.3150, lng: 26.2290 }, { name: "Altınkum Plajı", lat: 38.2676, lng: 26.2731 },
@@ -364,73 +383,77 @@
             { name: "Çeşme Dodo Beach", lat: 38.3450, lng: 26.3600 }, { name: "Ardıç Plajı", lat: 38.3300, lng: 26.4000 },
             { name: "Çark Plajı", lat: 38.2500, lng: 26.3860 }, { name: "Delikli Koy", lat: 38.2380, lng: 26.3770 }
         ];
+        const defaultStartDate = () => Date.now() - ((280*24+14)*60*60*1000);
 
         async function initAppSystem() {
-            await syncFromCloudFirstTime();
-            startNeverEndingTimer(); 
-            initLeafletMap(); 
+            // 1) Cihazda daha önce görülen son veriyi anında göster (internet gelene kadar boş kalmasın)
+            loadFromLocalCache();
             renderGrids();
+            startNeverEndingTimer();
+            initLeafletMap();
 
-            // Arka planda her 4 saniyede bir otomatik senkronizasyon (Sayfayı yenilediğinde veya açıkken anında görürsünüz)
-            setInterval(syncFromCloud, 4000);
+            // 2) Ortak bulut veritabanına bağlan - bundan sonra ikiniz de anlık olarak senkronize olursunuz
+            connectFirebase();
         }
 
-        async function syncFromCloudFirstTime() {
+        function loadFromLocalCache() {
             try {
-                let res = await fetch(`https://jsonblob.com/api/jsonBlob/${cloudId}`, { headers: { 'Accept': 'application/json' } });
-                if(res.ok) {
-                    let remoteData = await res.json();
-                    if(remoteData && remoteData.places) {
-                        loveDB = remoteData;
-                    }
-                } else {
-                    // Eğer bulutta ilk kez kuruluyorsa varsayılan verileri yükle
-                    loveDB = { movies: [], notes: [], places: defaultPlaces };
-                    await saveDB();
-                }
-            } catch(e) {
-                const savedDB = localStorage.getItem('NazliAlperenDB'); 
-                if(savedDB) loveDB = JSON.parse(savedDB);
-                if(!loveDB.places || loveDB.places.length === 0) loveDB.places = defaultPlaces;
-            }
-            renderGrids();
-            if(mapInstance) drawMapElements();
-        }
-
-        async function syncFromCloud() {
-            try {
-                let res = await fetch(`https://jsonblob.com/api/jsonBlob/${cloudId}`, { headers: { 'Accept': 'application/json' } });
-                if(res.ok) {
-                    let remoteData = await res.json();
-                    if(remoteData && remoteData.places) {
-                        if(JSON.stringify(remoteData) !== JSON.stringify(loveDB)) {
-                            loveDB = remoteData;
-                            localStorage.setItem('NazliAlperenDB', JSON.stringify(loveDB));
-                            renderGrids();
-                            if(mapInstance) drawMapElements();
-                        }
-                    }
-                }
+                const cached = localStorage.getItem('NazliAlperenDB');
+                if(cached) loveDB = JSON.parse(cached);
             } catch(e) {}
+            if(!loveDB.places || loveDB.places.length === 0) loveDB.places = defaultPlaces;
+            if(!loveDB.movies) loveDB.movies = [];
+            if(!loveDB.notes) loveDB.notes = [];
+            if(!loveDB.startDate) {
+                const oldStart = localStorage.getItem('NazliAlperenStartDate');
+                loveDB.startDate = oldStart ? parseInt(oldStart) : defaultStartDate();
+            }
+        }
+
+        function persistLocalCache() {
+            try { localStorage.setItem('NazliAlperenDB', JSON.stringify(loveDB)); } catch(e) {}
+        }
+
+        function connectFirebase() {
+            if(!FIREBASE_CONFIG.apiKey || FIREBASE_CONFIG.apiKey.indexOf('BURAYA_YAPISTIR') > -1) {
+                console.warn('Firebase ayarları girilmemiş: veriler sadece bu cihazda kalacak, ikiniz arasında senkronize olmayacak.');
+                return;
+            }
+            try {
+                firebase.initializeApp(FIREBASE_CONFIG);
+                loveRef = firebase.database().ref('loveDB');
+                loveRef.on('value', (snapshot) => {
+                    const remote = snapshot.val();
+                    if(remote) {
+                        loveDB = {
+                            movies: remote.movies || [],
+                            notes: remote.notes || [],
+                            places: (remote.places && remote.places.length > 0) ? remote.places : defaultPlaces,
+                            startDate: remote.startDate || defaultStartDate()
+                        };
+                    } else if(!firstSnapshotHandled) {
+                        // Bulutta hiç veri yok - ilk kurulum, mevcut yerlerle başlat, kaybolmasın
+                        loveDB.startDate = loveDB.startDate || defaultStartDate();
+                        loveRef.set(loveDB);
+                    }
+                    firstSnapshotHandled = true;
+                    persistLocalCache();
+                    renderGrids();
+                    if(mapInstance) drawMapElements();
+                }, (err) => console.warn('Firebase bağlantı hatası:', err));
+            } catch(e) { console.warn('Firebase başlatılamadı:', e); }
         }
 
         async function saveDB() {
-            localStorage.setItem('NazliAlperenDB', JSON.stringify(loveDB));
-            try {
-                await fetch(`https://jsonblob.com/api/jsonBlob/${cloudId}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                    body: JSON.stringify(loveDB)
-                });
-            } catch(e) {}
+            persistLocalCache();
+            if(loveRef) {
+                try { await loveRef.set(loveDB); } catch(e) { console.warn('Buluta kaydedilemedi (internet yok olabilir):', e); }
+            }
         }
 
         function startNeverEndingTimer() {
-            let startDateStr = localStorage.getItem('NazliAlperenStartDate');
-            let startDate = startDateStr ? parseInt(startDateStr) : Date.now() - ((280*24+14)*60*60*1000);
-            if(!startDateStr) localStorage.setItem('NazliAlperenStartDate', startDate.toString());
             setInterval(() => {
-                let diff = Date.now() - startDate;
+                let diff = Date.now() - (loveDB.startDate || defaultStartDate());
                 document.getElementById('t-d').innerText = Math.floor(diff/(1000*60*60*24));
                 document.getElementById('t-h').innerText = Math.floor((diff/(1000*60*60))%24).toString().padStart(2,'0');
                 document.getElementById('t-m').innerText = Math.floor((diff/(1000*60))%60).toString().padStart(2,'0');
@@ -450,8 +473,8 @@
             if(mapInstance) return;
             mapInstance = L.map('map-container', { zoomControl: false, scrollWheelZoom: false, dragging: false, touchZoom: false, doubleClickZoom: false }).setView([38.2950, 26.3150], 11);
             
-            L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', { 
-                attribution: 'Nazlı & Alperen', maxZoom: 19 
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { 
+                attribution: '© OpenStreetMap, © CARTO — Nazlı & Alperen', subdomains: 'abcd', maxZoom: 20
             }).addTo(mapInstance);
             
             drawMapElements();
@@ -463,7 +486,11 @@
             mapMarkers.clearLayers(); if(routeLayers) mapInstance.removeLayer(routeLayers); routeLayers = L.layerGroup();
             
             let pts = [...loveDB.places]; if(pts.length===0) { isDrawingMap = false; return; }
-            const pinIcon = L.divIcon({ className: 'custom-pin', iconSize: [14,14], iconAnchor: [7,7] });
+            const pinIcon = L.divIcon({
+                className: 'cute-pin-wrap',
+                html: `<div class="cute-pin"><svg viewBox="0 0 24 32" width="28" height="36" xmlns="http://www.w3.org/2000/svg"><path d="M12 0C5.4 0 0 5.4 0 12c0 9 12 20 12 20s12-11 12-20C24 5.4 18.6 0 12 0z" fill="#ff0055" stroke="#fff" stroke-width="1.6"/><circle cx="12" cy="12" r="4.6" fill="#fff"/></svg></div>`,
+                iconSize: [28, 36], iconAnchor: [14, 34]
+            });
 
             loveDB.places.forEach((p, i) => {
                 const marker = L.marker([p.lat, p.lng], { icon: pinIcon, draggable: true });
