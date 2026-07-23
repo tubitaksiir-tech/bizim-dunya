@@ -82,12 +82,8 @@
         #app-dashboard { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 50; display: none; opacity: 0; flex-direction: column; background: transparent; transition: opacity 1s ease; }
         .app-container { display: flex; flex-direction: column; height: 100%; width: 100%; max-width: 900px; margin: 0 auto; background: rgba(0,0,0,0.3); box-shadow: 0 0 50px rgba(0,0,0,0.8); position: relative; overflow: hidden; }
 
-        header { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: rgba(15,0,10,0.85); backdrop-filter: blur(15px); border-bottom: 1px solid var(--glass-border); z-index: 100; box-shadow: 0 5px 20px rgba(0,0,0,0.5); flex-shrink: 0; }
+        header { padding: 10px 15px; text-align: center; background: rgba(15,0,10,0.85); backdrop-filter: blur(15px); border-bottom: 1px solid var(--glass-border); z-index: 100; box-shadow: 0 5px 20px rgba(0,0,0,0.5); flex-shrink: 0; }
         header h1 { font-family: 'Dancing Script', cursive; font-size: 1.6rem; background: linear-gradient(45deg, #ff0055, #ff99cc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin:0; filter: drop-shadow(0 0 6px rgba(255,0,85,0.4));}
-
-        /* BULUT BAĞLANTI DURUM BUTONU */
-        #cloud-btn { background: rgba(255,0,85,0.2); border: 1px solid var(--primary); color: #ffb3c6; padding: 5px 10px; border-radius: 12px; font-size: 0.7rem; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 5px; transition: 0.3s; }
-        #cloud-btn:hover { background: var(--primary); color: #fff; }
 
         .timer-wrapper { padding: 8px 12px; text-align: center; background: linear-gradient(to bottom, rgba(255,0,85,0.08), transparent); border-bottom: 1px solid var(--glass-border); z-index: 10; flex-shrink: 0; }
         .timer-title { font-size: 0.75rem; color: #ffccd5; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 6px; font-weight: 600; display:flex; justify-content:center; align-items:center; gap:6px;}
@@ -209,7 +205,6 @@
         <div class="app-container">
             <header>
                 <h1>Bizim Dünyamız</h1>
-                <div id="cloud-btn" onclick="handleCloudAction()"><i class="fas fa-cloud"></i> <span id="cloud-txt">Bağlantı Kur</span></div>
             </header>
 
             <div class="timer-wrapper">
@@ -343,13 +338,12 @@
         });
 
         // ==========================================
-        // BULUT SENKRONİZASYON VE VERİTABANI MOTORU
+        // OTOMATİK BULUT SENKRONİZASYON MOTORU
         // ==========================================
         let loveDB = { movies: [], notes: [], places: [] };
         let mapInstance = null; let routeLayers = null; let mapMarkers = L.layerGroup(); let isDrawingMap = false;
         
         let cloudId = new URLSearchParams(window.location.search).get('id') || localStorage.getItem('NazliAlperenCloudID');
-        if(cloudId) localStorage.setItem('NazliAlperenCloudID', cloudId);
 
         const defaultPlaces = [
             { name: "Pırlanta Plajı", lat: 38.3150, lng: 26.2290 }, { name: "Altınkum Plajı", lat: 38.2676, lng: 26.2731 },
@@ -359,21 +353,55 @@
             { name: "Çark Plajı", lat: 38.2500, lng: 26.3860 }, { name: "Delikli Koy", lat: 38.2380, lng: 26.3770 }
         ];
 
-        function initAppSystem() {
-            const savedDB = localStorage.getItem('NazliAlperenDB'); 
-            if(savedDB) loveDB = JSON.parse(savedDB);
-            if(!loveDB.places || loveDB.places.length === 0) { loveDB.places = defaultPlaces; }
-            
+        async function initAppSystem() {
+            // Eğer URL'de ID yoksa ve daha önce bulut ID oluşturulmadıysa otomatik yeni oda kur
+            if(!cloudId) {
+                try {
+                    let res = await fetch('https://jsonblob.com/api/jsonBlob', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                        body: JSON.stringify({ movies: [], notes: [], places: defaultPlaces })
+                    });
+                    let loc = res.headers.get('Location');
+                    if(loc) {
+                        let parts = loc.split('/');
+                        cloudId = parts[parts.length - 1];
+                        if(cloudId) {
+                            localStorage.setItem('NazliAlperenCloudID', cloudId);
+                            window.history.replaceState({}, '', window.location.pathname + '?id=' + cloudId);
+                        }
+                    }
+                } catch(e) { console.log("Otomatik bulut kurulamadı, yerel mod."); }
+            }
+
+            if(cloudId) {
+                localStorage.setItem('NazliAlperenCloudID', cloudId);
+                await syncFromCloudFirstTime();
+                setInterval(syncFromCloud, 4000); // Canlı senkronizasyon
+            } else {
+                const savedDB = localStorage.getItem('NazliAlperenDB'); 
+                if(savedDB) loveDB = JSON.parse(savedDB);
+                if(!loveDB.places || loveDB.places.length === 0) loveDB.places = defaultPlaces;
+            }
+
             startNeverEndingTimer(); 
             initLeafletMap(); 
             renderGrids();
-            updateCloudUI();
+        }
 
-            if(cloudId) {
-                syncFromCloud();
-                // Her 5 saniyede bir buluttan güncellemeleri kontrol et (Canlı Senkronizasyon)
-                setInterval(syncFromCloud, 5000);
-            }
+        async function syncFromCloudFirstTime() {
+            try {
+                let res = await fetch(`https://jsonblob.com/api/jsonBlob/${cloudId}`, { headers: { 'Accept': 'application/json' } });
+                if(res.ok) {
+                    let remoteData = await res.json();
+                    if(remoteData && remoteData.places) {
+                        loveDB = remoteData;
+                    }
+                }
+            } catch(e) {}
+            if(!loveDB.places || loveDB.places.length === 0) loveDB.places = defaultPlaces;
+            renderGrids();
+            if(mapInstance) drawMapElements();
         }
 
         async function syncFromCloud() {
@@ -383,13 +411,15 @@
                 if(res.ok) {
                     let remoteData = await res.json();
                     if(remoteData && remoteData.places) {
-                        loveDB = remoteData;
-                        localStorage.setItem('NazliAlperenDB', JSON.stringify(loveDB));
-                        renderGrids();
-                        if(mapInstance) drawMapElements();
+                        // Veride değişiklik varsa güncelle
+                        if(JSON.stringify(remoteData) !== JSON.stringify(loveDB)) {
+                            loveDB = remoteData;
+                            renderGrids();
+                            if(mapInstance) drawMapElements();
+                        }
                     }
                 }
-            } catch(e) { console.log("Bulut senkronizasyon beklemede..."); }
+            } catch(e) {}
         }
 
         async function saveDB() {
@@ -401,43 +431,7 @@
                         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
                         body: JSON.stringify(loveDB)
                     });
-                } catch(e) { console.log("Buluta kaydedilemedi"); }
-            }
-        }
-
-        async function handleCloudAction() {
-            if(!cloudId) {
-                if(confirm("Ortak bulut bağlantısı kurulsun mu? Bu sayede Nazlı ile aynı anda ortak verileri görebileceksiniz.")) {
-                    try {
-                        let res = await fetch('https://jsonblob.com/api/jsonBlob', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                            body: JSON.stringify(loveDB)
-                        });
-                        let loc = res.headers.get('Location');
-                        if(loc) {
-                            let parts = loc.split('/');
-                            let newId = parts[parts.length - 1];
-                            if(newId) {
-                                localStorage.setItem('NazliAlperenCloudID', newId);
-                                window.location.href = window.location.pathname + '?id=' + newId;
-                            }
-                        }
-                    } catch(e) { alert("Bağlantı kurulamadı."); }
-                }
-            } else {
-                prompt("Bu bağlantı linkini kopyala ve Nazlı'ya gönder. Bu linke giren herkes sizinle aynı verileri görecek:", window.location.href);
-            }
-        }
-
-        function updateCloudUI() {
-            const btnTxt = document.getElementById('cloud-txt');
-            if(cloudId) {
-                btnTxt.innerText = "Senkronize";
-                document.getElementById('cloud-btn').style.borderColor = "#00ff88";
-                document.getElementById('cloud-btn').style.color = "#00ff88";
-            } else {
-                btnTxt.innerText = "Bağlantı Kur";
+                } catch(e) {}
             }
         }
 
