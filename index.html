@@ -32,150 +32,147 @@
 
         #bg-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; background: radial-gradient(circle at center, #240016 0%, #05000a 100%); pointer-events: none; }
 
-        /* GİRİŞ OYUNU */
+        /* GİRİŞ OYUNU & MOBİL UYUMLU BAŞLIKLAR */
         #intro-wrapper { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; transition: opacity 1s ease; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        #game-screen, #finale-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        #finale-screen { display: none; z-index: 12; }
+        #game-screen, #finale-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 15px; }
+        #finale-screen { display: none; z-index: 12; text-align: center; }
         
-        .glass-box { width: 90%; max-width: 480px; background: var(--glass-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 40px; padding: 50px 30px; text-align: center; box-shadow: 0 30px 60px rgba(0,0,0,0.9), inset 0 0 30px rgba(255, 0, 85, 0.15); z-index: 11; }
-        .title { font-family: 'Dancing Script', cursive; font-size: 3.5rem; background: linear-gradient(45deg, #ff0055, #ff99cc, #ff0055); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 15px; animation: shine 3s linear infinite; filter: drop-shadow(0 0 10px rgba(255,0,85,0.6)); }
+        .glass-box { width: 92%; max-width: 440px; background: var(--glass-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 35px; padding: 35px 20px; text-align: center; box-shadow: 0 30px 60px rgba(0,0,0,0.9), inset 0 0 30px rgba(255, 0, 85, 0.15); z-index: 11; }
+        
+        .title { 
+            font-family: 'Dancing Script', cursive; 
+            font-size: clamp(2.5rem, 7vw, 3.5rem); 
+            background: linear-gradient(45deg, #ff0055, #ff99cc, #ff0055); 
+            background-size: 200% auto;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; 
+            margin-bottom: 10px; animation: shine 3s linear infinite; filter: drop-shadow(0 0 10px rgba(255,0,85,0.6)); 
+        }
         @keyframes shine { to { background-position: 200% center; } }
         
-        .subtitle { font-size: 1.1rem; color: var(--secondary); margin-bottom: 50px; line-height: 1.5; min-height: 50px;}
+        .subtitle { font-size: clamp(0.95rem, 3vw, 1.1rem); color: var(--secondary); margin-bottom: 35px; line-height: 1.4; min-height: 45px;}
 
-        .path-wrapper { position: relative; width: 100%; height: 80px; margin-bottom: 60px; }
-        .path-line { position: absolute; bottom: 20px; left: 0; width: 100%; height: 4px; background: rgba(255, 255, 255, 0.1); border-radius: 4px; }
-        .path-fill { position: absolute; bottom: 20px; left: 0; width: 0%; height: 4px; background: linear-gradient(90deg, var(--primary), var(--secondary)); box-shadow: 0 0 20px var(--primary); transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
-        .path-dots { position: absolute; bottom: 18px; left: 0; width: 100%; display: flex; justify-content: space-between; padding: 0 10%; z-index: 2; }
-        .dot { width: 8px; height: 8px; background: rgba(255,255,255,0.2); border-radius: 50%; transition: 0.4s; }
-        .dot.active { background: #fff; box-shadow: 0 0 15px #ff3366, 0 0 30px #ff3366; transform: scale(1.5); }
+        .path-wrapper { position: relative; width: 100%; height: 70px; margin-bottom: 40px; }
+        .path-line { position: absolute; bottom: 15px; left: 0; width: 100%; height: 4px; background: rgba(255, 255, 255, 0.1); border-radius: 4px; }
+        .path-fill { position: absolute; bottom: 15px; left: 0; width: 0%; height: 4px; background: linear-gradient(90deg, var(--primary), var(--secondary)); box-shadow: 0 0 20px var(--primary); transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .path-dots { position: absolute; bottom: 13px; left: 0; width: 100%; display: flex; justify-content: space-between; padding: 0 10%; z-index: 2; }
+        .dot { width: 7px; height: 7px; background: rgba(255,255,255,0.2); border-radius: 50%; transition: 0.4s; }
+        .dot.active { background: #fff; box-shadow: 0 0 12px #ff3366, 0 0 25px #ff3366; transform: scale(1.4); }
         
-        .avatar { position: absolute; bottom: 20px; width: 65px; height: 65px; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 2.5rem; box-shadow: 0 10px 25px rgba(0,0,0,0.5); transition: left 0.5s ease-out, right 0.5s ease-out, transform 0.3s; animation: floatAv 3s ease-in-out infinite; }
-        @keyframes floatAv { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+        .avatar { position: absolute; bottom: 15px; width: 55px; height: 55px; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 2.2rem; box-shadow: 0 10px 25px rgba(0,0,0,0.5); transition: left 0.5s ease-out, right 0.5s ease-out, transform 0.3s; animation: floatAv 3s ease-in-out infinite; }
+        @keyframes floatAv { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
         
         #nazli { left: 0%; transform: translateX(-50%); z-index: 4;} 
         #alperen { right: 0%; transform: translateX(50%); animation-delay: 1.5s; z-index: 3;}
-        #hug { display: none; left: 50%; transform: translateX(-50%) scale(0); font-size: 4.5rem; position: absolute; bottom: 5px; transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); z-index: 5;}
+        #hug { display: none; left: 50%; transform: translateX(-50%) scale(0); font-size: 3.8rem; position: absolute; bottom: 5px; transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); z-index: 5;}
         
-        .btn { background: linear-gradient(45deg, var(--primary), #ff4d79); border: none; padding: 18px 40px; font-size: 1.1rem; font-weight: 600; color: white; border-radius: 50px; cursor: pointer; box-shadow: 0 10px 30px rgba(255,0,85,0.5); width: 80%; max-width: 300px; outline: none; font-family: 'Montserrat'; transition: 0.2s;}
+        .btn { background: linear-gradient(45deg, var(--primary), #ff4d79); border: none; padding: 15px 35px; font-size: 1rem; font-weight: 600; color: white; border-radius: 50px; cursor: pointer; box-shadow: 0 10px 30px rgba(255,0,85,0.5); width: 80%; max-width: 260px; outline: none; font-family: 'Montserrat'; transition: 0.2s;}
         .btn:active { transform: scale(0.95); }
 
         #flash { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 999; opacity: 0; pointer-events: none; transition: opacity 1.5s ease; }
-        .neon-heart { position: relative; width: 100px; height: 100px; margin-bottom: 40px; animation: heartbeat 1.5s infinite; }
-        .neon-heart::before, .neon-heart::after { content: ''; position: absolute; top: 0; width: 50px; height: 80px; border-radius: 50px 50px 0 0; background: var(--primary); box-shadow: 0 0 50px var(--primary); }
-        .neon-heart::before { left: 50px; transform: rotate(-45deg); transform-origin: 0 100%; } .neon-heart::after { left: 0; transform: rotate(45deg); transform-origin: 100% 100%; }
-        @keyframes heartbeat { 0%, 100% { transform: scale(1); } 15%, 45% { transform: scale(1.15); filter: drop-shadow(0 0 30px var(--primary)); } 30% { transform: scale(1); } }
+        .neon-heart { position: relative; width: 80px; height: 80px; margin: 0 auto 20px auto; animation: heartbeat 1.5s infinite; }
+        .neon-heart::before, .neon-heart::after { content: ''; position: absolute; top: 0; width: 40px; height: 64px; border-radius: 40px 40px 0 0; background: var(--primary); box-shadow: 0 0 40px var(--primary); }
+        .neon-heart::before { left: 40px; transform: rotate(-45deg); transform-origin: 0 100%; } .neon-heart::after { left: 0; transform: rotate(45deg); transform-origin: 100% 100%; }
+        @keyframes heartbeat { 0%, 100% { transform: scale(1); } 15%, 45% { transform: scale(1.15); filter: drop-shadow(0 0 25px var(--primary)); } 30% { transform: scale(1); } }
         
-        .typewriter-text { font-size: 1.15rem; line-height: 1.8; color: #fff0f3; min-height: 150px; max-width: 600px; text-align: center; padding: 0 20px; text-shadow: 0 2px 10px rgba(0,0,0,0.8); }
-        #go-app-btn { display: none; opacity: 0; margin-top: 40px; background: rgba(255,255,255,0.05); border: 1px solid var(--primary); color: #fff; padding: 15px 35px; border-radius: 30px; font-family: 'Montserrat'; font-weight: 600; font-size: 1.1rem; cursor: pointer; transition: all 0.5s; box-shadow: 0 0 20px rgba(255,0,85,0.2); pointer-events: auto; }
-        #go-app-btn:hover { background: var(--primary); box-shadow: 0 0 40px var(--primary); transform: translateY(-3px); }
+        .typewriter-text { font-size: clamp(0.95rem, 2.8vw, 1.1rem); line-height: 1.6; color: #fff0f3; max-width: 550px; text-shadow: 0 2px 10px rgba(0,0,0,0.8); margin-bottom: 25px; }
+        #go-app-btn { display: none; opacity: 0; background: rgba(255,255,255,0.08); border: 1px solid var(--primary); color: #fff; padding: 12px 28px; border-radius: 30px; font-family: 'Montserrat'; font-weight: 600; font-size: 1rem; cursor: pointer; transition: all 0.5s; box-shadow: 0 0 20px rgba(255,0,85,0.3); pointer-events: auto; }
+        #go-app-btn:hover { background: var(--primary); box-shadow: 0 0 35px var(--primary); transform: translateY(-3px); }
 
-        /* ANA UYGULAMA PANELİ */
+        /* ANA UYGULAMA PANELİ (DASHBOARD) */
         #app-dashboard { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 50; display: none; opacity: 0; flex-direction: column; background: transparent; transition: opacity 1s ease; }
         .app-container { display: flex; flex-direction: column; height: 100%; width: 100%; max-width: 900px; margin: 0 auto; background: rgba(0,0,0,0.3); box-shadow: 0 0 50px rgba(0,0,0,0.8); position: relative; overflow: hidden; }
 
-        header { padding: 10px 15px; text-align: center; background: rgba(15,0,10,0.8); backdrop-filter: blur(15px); border-bottom: 1px solid var(--glass-border); z-index: 100; box-shadow: 0 5px 30px rgba(0,0,0,0.5); }
-        header h1 { font-family: 'Dancing Script', cursive; font-size: 1.8rem; background: linear-gradient(45deg, #ff0055, #ff99cc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin:0; filter: drop-shadow(0 0 8px rgba(255,0,85,0.4));}
+        header { padding: 8px 12px; text-align: center; background: rgba(15,0,10,0.85); backdrop-filter: blur(15px); border-bottom: 1px solid var(--glass-border); z-index: 100; box-shadow: 0 5px 20px rgba(0,0,0,0.5); flex-shrink: 0; }
+        header h1 { font-family: 'Dancing Script', cursive; font-size: 1.6rem; background: linear-gradient(45deg, #ff0055, #ff99cc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin:0; filter: drop-shadow(0 0 6px rgba(255,0,85,0.4));}
 
-        .timer-wrapper { padding: 10px 15px; text-align: center; background: linear-gradient(to bottom, rgba(255,0,85,0.08), transparent); border-bottom: 1px solid var(--glass-border); z-index: 10;}
-        .timer-title { font-size: 0.8rem; color: #ffccd5; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; font-weight: 600; display:flex; justify-content:center; align-items:center; gap:8px;}
-        .timer-grid { display: flex; justify-content: center; gap: 8px; max-width: 500px; margin: 0 auto;}
-        .t-box { flex:1; background: linear-gradient(135deg, rgba(255,0,85,0.1), rgba(0,0,0,0.6)); border: 1px solid rgba(255,0,85,0.3); border-radius: 12px; padding: 8px 2px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); backdrop-filter: blur(5px); }
-        .t-num { font-size: 1.4rem; font-weight: 700; color: #fff; text-shadow: 0 0 15px var(--primary); font-variant-numeric: tabular-nums; }
-        .t-lbl { font-size: 0.6rem; color: #ffb3c6; margin-top: 2px; text-transform:uppercase; letter-spacing:1px; font-weight: 600;}
+        /* KÜÇÜLTÜLMÜŞ SAYAÇ (Her ekrana kusursuz sığar) */
+        .timer-wrapper { padding: 8px 12px; text-align: center; background: linear-gradient(to bottom, rgba(255,0,85,0.08), transparent); border-bottom: 1px solid var(--glass-border); z-index: 10; flex-shrink: 0; }
+        .timer-title { font-size: 0.75rem; color: #ffccd5; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 6px; font-weight: 600; display:flex; justify-content:center; align-items:center; gap:6px;}
+        .timer-grid { display: flex; justify-content: center; gap: 6px; max-width: 450px; margin: 0 auto;}
+        .t-box { flex:1; background: linear-gradient(135deg, rgba(255,0,85,0.1), rgba(0,0,0,0.6)); border: 1px solid rgba(255,0,85,0.3); border-radius: 10px; padding: 6px 2px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); backdrop-filter: blur(5px); }
+        .t-num { font-size: 1.25rem; font-weight: 700; color: #fff; text-shadow: 0 0 10px var(--primary); font-variant-numeric: tabular-nums; }
+        .t-lbl { font-size: 0.55rem; color: #ffb3c6; margin-top: 2px; text-transform:uppercase; letter-spacing:1px; font-weight: 600;}
 
         .content-area { flex: 1; position: relative; overflow: hidden; display: flex; flex-direction: column; }
-        .tab-panel { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; padding: 15px; overflow-y: auto; }
-        #tab-map { overflow: hidden; padding-bottom: 10px; display: none; flex-direction: column; }
+        .tab-panel { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; padding: 12px; overflow-y: auto; }
+        #tab-map { overflow: hidden; padding-bottom: 8px; display: none; flex-direction: column; }
         #tab-map.active { display: flex !important; animation: slideIn 0.4s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
         .tab-panel.active { display: block; animation: slideIn 0.4s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
-        @keyframes slideIn { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
 
-        .section-header { flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .section-header h2 { font-size: 1.15rem; font-weight: 600; display: flex; align-items: center; gap: 8px; color: #fff;}
-        .section-header h2 i { color: var(--primary); text-shadow: 0 0 10px var(--primary); }
-        .add-action-btn { background: linear-gradient(45deg, rgba(255,0,85,0.2), transparent); border: 1px solid var(--primary); color: #fff; padding: 6px 14px; border-radius: 12px; font-size: 0.85rem; cursor: pointer; transition: 0.3s; font-weight:600; box-shadow: 0 0 10px rgba(255,0,85,0.2);}
-        .add-action-btn:active { background: var(--primary); box-shadow: 0 0 20px var(--primary); }
+        .section-header { flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .section-header h2 { font-size: 1.05rem; font-weight: 600; display: flex; align-items: center; gap: 6px; color: #fff;}
+        .section-header h2 i { color: var(--primary); text-shadow: 0 0 8px var(--primary); }
+        .add-action-btn { background: linear-gradient(45deg, rgba(255,0,85,0.2), transparent); border: 1px solid var(--primary); color: #fff; padding: 5px 12px; border-radius: 10px; font-size: 0.8rem; cursor: pointer; transition: 0.3s; font-weight:600; box-shadow: 0 0 8px rgba(255,0,85,0.2);}
+        .add-action-btn:active { background: var(--primary); box-shadow: 0 0 15px var(--primary); }
 
-        /* =========================================
-           İLLÜSTRASYON TARZI RENKLİ VE CANLI HARİTA
-           ========================================= */
+        /* HARİTA ALANI */
         #map-container { 
             flex: 1; 
             width: 100%; 
             height: auto; 
             min-height: 0; 
-            border-radius: 15px; 
+            border-radius: 14px; 
             overflow: hidden; 
             border: 2px solid rgba(255, 0, 85, 0.4); 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.6), 0 0 20px rgba(255,0,85,0.15); 
+            box-shadow: 0 8px 25px rgba(0,0,0,0.6), 0 0 15px rgba(255,0,85,0.15); 
             z-index: 1;
             background: #eef2e6;
         }
         
-        /* Harita Fayanlarına İllüstrasyon / Çizgi Roman Doygunluk Filtresi */
-        .leaflet-tile {
-            filter: saturate(2.2) contrast(1.15) brightness(1.02);
-        }
-        
+        .leaflet-tile { filter: saturate(2.2) contrast(1.15) brightness(1.02); }
         .custom-pin { background: #fff; border: 3px solid var(--primary); border-radius: 50%; box-shadow: 0 0 10px var(--primary); animation: pulsePin 1.5s infinite; cursor: pointer; }
         @keyframes pulsePin { 0% { box-shadow: 0 0 0 0 rgba(255,0,85,0.9); } 70% { box-shadow: 0 0 0 12px rgba(255,0,85,0); } 100% { box-shadow: 0 0 0 0 rgba(255,0,85,0); } }
         
-        /* ÇOK DAHA ZARİF VE İNCE NEON ROTA ÇİZGİSİ */
-        .neon-route-thin { 
-            stroke-dasharray: 6 10; 
-            animation: dashAnim 20s linear infinite; 
-            filter: drop-shadow(0 0 3px #ff0055); 
-        }
+        .neon-route-thin { stroke-dasharray: 6 10; animation: dashAnim 20s linear infinite; filter: drop-shadow(0 0 3px #ff0055); }
         @keyframes dashAnim { to { stroke-dashoffset: -500; } }
 
-        /* Üstüne Basınca Çıkan Şık Baloncuk (Tooltip) */
-        .custom-tooltip { background: rgba(20,0,10,0.9); border: 1px solid var(--primary); border-radius: 8px; color: #fff; font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 0.75rem; box-shadow: 0 4px 15px rgba(255,0,85,0.4); padding: 6px 12px; }
+        .custom-tooltip { background: rgba(20,0,10,0.9); border: 1px solid var(--primary); border-radius: 8px; color: #fff; font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 0.75rem; box-shadow: 0 4px 15px rgba(255,0,85,0.4); padding: 5px 10px; }
         .leaflet-tooltip-top:before { border-top-color: rgba(20,0,10,0.9); }
-        .leaflet-popup-content-wrapper, .leaflet-popup-tip { background: rgba(255,255,255,0.95); border: 1px solid var(--primary); color: #333; backdrop-filter: blur(10px); text-align: center; border-radius: 12px;}
+        .leaflet-popup-content-wrapper, .leaflet-popup-tip { background: rgba(255,255,255,0.95); border: 1px solid var(--primary); color: #333; backdrop-filter: blur(10px); text-align: center; border-radius: 10px;}
 
-        /* Veri Kartları ve Düzenle/Sil */
-        .data-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; padding-bottom: 20px; }
-        @media(min-width: 600px) { .data-grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); } .t-num { font-size: 1.8rem; } }
+        /* KARTLAR VE DÜZENLE/SİL İKONLARI */
+        .data-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; padding-bottom: 20px; }
+        @media(min-width: 600px) { .data-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); } .t-num { font-size: 1.5rem; } }
         
-        .data-card { background: linear-gradient(135deg, rgba(20,0,10,0.8), rgba(40,0,20,0.8)); border: 1px solid rgba(255, 0, 85, 0.2); border-radius: 15px; overflow: hidden; position: relative; transition: 0.3s; backdrop-filter:blur(10px); box-shadow: 0 5px 15px rgba(0,0,0,0.5);}
-        .data-card img { width: 100%; height: 180px; object-fit: cover; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .no-img { width: 100%; height: 180px; display:flex; justify-content:center; align-items:center; background: rgba(255,0,85,0.05); color: var(--primary); font-size: 3rem; text-shadow: 0 0 20px var(--primary);}
-        .card-body { padding: 12px; }
-        .card-title { font-size: 0.95rem; font-weight: 600; color: #fff; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 40px;}
-        .card-desc { font-size: 0.8rem; color: #aaa; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .data-card { background: linear-gradient(135deg, rgba(20,0,10,0.8), rgba(40,0,20,0.8)); border: 1px solid rgba(255, 0, 85, 0.2); border-radius: 12px; overflow: hidden; position: relative; transition: 0.3s; backdrop-filter:blur(10px); box-shadow: 0 4px 12px rgba(0,0,0,0.5);}
+        .data-card img { width: 100%; height: 150px; object-fit: cover; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .no-img { width: 100%; height: 150px; display:flex; justify-content:center; align-items:center; background: rgba(255,0,85,0.05); color: var(--primary); font-size: 2.5rem; text-shadow: 0 0 15px var(--primary);}
+        .card-body { padding: 10px; }
+        .card-title { font-size: 0.9rem; font-weight: 600; color: #fff; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 35px;}
+        .card-desc { font-size: 0.75rem; color: #aaa; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         
-        .card-actions { position: absolute; top: 10px; right: 10px; display: flex; gap: 6px; z-index: 5; }
-        .action-icon { background: rgba(0,0,0,0.7); color: #fff; width: 30px; height: 30px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: 0.3s; font-size: 0.75rem; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(5px);}
+        .card-actions { position: absolute; top: 8px; right: 8px; display: flex; gap: 5px; z-index: 5; }
+        .action-icon { background: rgba(0,0,0,0.75); color: #fff; width: 28px; height: 28px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: 0.3s; font-size: 0.7rem; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(5px);}
         .action-icon.edit:hover { background: #00ccff; border-color: #00ccff; transform: scale(1.1); }
         .action-icon.delete:hover { background: #ff0055; border-color: #ff0055; transform: scale(1.1); }
 
-        .note-card { grid-column: 1 / -1; display:flex; gap:15px; background: linear-gradient(135deg, rgba(255,0,85,0.15), rgba(0,0,0,0.7)); padding:15px; border-left: 4px solid var(--primary);}
-        .note-card .card-actions { top: 15px; right: 15px; }
-        .note-card img { width: 80px; height: 80px; border-radius: 10px; border:none;}
-        .note-card .no-img { width: 80px; height: 80px; font-size: 2rem; border-radius: 10px;}
-        .empty-text { grid-column: 1 / -1; text-align: center; padding: 40px 20px; color: #888; font-style: italic; font-size: 0.95rem; }
+        .note-card { grid-column: 1 / -1; display:flex; gap:12px; background: linear-gradient(135deg, rgba(255,0,85,0.15), rgba(0,0,0,0.7)); padding:12px; border-left: 4px solid var(--primary);}
+        .note-card .card-actions { top: 12px; right: 12px; }
+        .note-card img { width: 70px; height: 70px; border-radius: 8px; border:none;}
+        .note-card .no-img { width: 70px; height: 70px; font-size: 1.8rem; border-radius: 8px;}
+        .empty-text { grid-column: 1 / -1; text-align: center; padding: 30px 15px; color: #888; font-style: italic; font-size: 0.9rem; }
 
-        nav { flex-shrink: 0; display: flex; justify-content: space-around; background: rgba(10,0,5,0.9); backdrop-filter: blur(20px); border-top: 1px solid var(--glass-border); padding: 10px 0; padding-bottom: max(10px, env(safe-area-inset-bottom)); z-index: 100; box-shadow: 0 -5px 20px rgba(0,0,0,0.5);}
-        .nav-btn { color: #666; font-size: 1.2rem; cursor: pointer; transition: 0.3s; display: flex; flex-direction: column; align-items: center; gap: 4px; width: 33%; }
-        .nav-btn span { font-size: 0.7rem; font-weight: 500; }
-        .nav-btn.active { color: #fff; filter: drop-shadow(0 0 8px var(--primary)); transform: translateY(-3px); }
+        nav { flex-shrink: 0; display: flex; justify-content: space-around; background: rgba(10,0,5,0.9); backdrop-filter: blur(20px); border-top: 1px solid var(--glass-border); padding: 8px 0; padding-bottom: max(8px, env(safe-area-inset-bottom)); z-index: 100; box-shadow: 0 -4px 15px rgba(0,0,0,0.5);}
+        .nav-btn { color: #666; font-size: 1.1rem; cursor: pointer; transition: 0.3s; display: flex; flex-direction: column; align-items: center; gap: 3px; width: 33%; }
+        .nav-btn span { font-size: 0.65rem; font-weight: 500; }
+        .nav-btn.active { color: #fff; filter: drop-shadow(0 0 6px var(--primary)); transform: translateY(-2px); }
         .nav-btn.active i { background: linear-gradient(45deg, #ff0055, #ff99cc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
         /* MODAL */
-        #modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 1000; display: none; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s; }
-        .modal-content { background: #11000a; border: 1px solid var(--primary); border-radius: 25px; width: 90%; max-width: 400px; padding: 25px; box-shadow: 0 0 50px rgba(255,0,85,0.4); transform: scale(0.9); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        #modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 1000; display: none; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s; padding: 15px; }
+        .modal-content { background: #11000a; border: 1px solid var(--primary); border-radius: 20px; width: 100%; max-width: 380px; padding: 20px; box-shadow: 0 0 40px rgba(255,0,85,0.4); transform: scale(0.9); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .modal-content.show { transform: scale(1); }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; color: var(--secondary); font-size: 1.2rem; font-weight: 600; border-bottom: 1px solid var(--glass-border); padding-bottom: 10px; }
-        .close-btn { color: #888; font-size: 1.5rem; cursor: pointer; transition: 0.2s; } .close-btn:hover { color: #fff; }
-        .input-group { margin-bottom: 15px; } .input-group label { display: block; font-size: 0.8rem; color: #aaa; margin-bottom: 5px; }
-        .input-group input, .input-group textarea { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); padding: 12px; border-radius: 10px; color: #fff; font-family: 'Montserrat'; outline: none; transition: 0.3s; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; color: var(--secondary); font-size: 1.1rem; font-weight: 600; border-bottom: 1px solid var(--glass-border); padding-bottom: 8px; }
+        .close-btn { color: #888; font-size: 1.3rem; cursor: pointer; transition: 0.2s; } .close-btn:hover { color: #fff; }
+        .input-group { margin-bottom: 12px; } .input-group label { display: block; font-size: 0.75rem; color: #aaa; margin-bottom: 4px; }
+        .input-group input, .input-group textarea { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); padding: 10px; border-radius: 8px; color: #fff; font-family: 'Montserrat'; outline: none; transition: 0.3s; font-size: 0.9rem; }
         .input-group input:focus, .input-group textarea:focus { border-color: var(--primary); background: rgba(255,0,85,0.1); }
-        .upload-area { border: 2px dashed rgba(255,0,85,0.5); padding: 15px; text-align: center; border-radius: 10px; cursor: pointer; color: var(--secondary); transition: 0.3s; font-size: 0.85rem; background: rgba(255,0,85,0.05);}
+        .upload-area { border: 2px dashed rgba(255,0,85,0.5); padding: 12px; text-align: center; border-radius: 8px; cursor: pointer; color: var(--secondary); transition: 0.3s; font-size: 0.8rem; background: rgba(255,0,85,0.05);}
         .upload-area:hover { background: rgba(255,0,85,0.15); border-color: var(--primary); }
-        .upload-area i { font-size: 1.8rem; margin-bottom: 8px; display: block; color: var(--primary);}
+        .upload-area i { font-size: 1.5rem; margin-bottom: 6px; display: block; color: var(--primary);}
         #file-input { display: none; }
-        .save-btn { width: 100%; padding: 12px; background: linear-gradient(45deg, var(--primary), #ff4d79); color: #fff; border: none; border-radius: 10px; font-size: 1.05rem; font-weight: 600; cursor: pointer; margin-top: 5px; box-shadow: 0 5px 20px rgba(255,0,85,0.4); font-family: 'Montserrat';}
+        .save-btn { width: 100%; padding: 11px; background: linear-gradient(45deg, var(--primary), #ff4d79); color: #fff; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; margin-top: 5px; box-shadow: 0 4px 15px rgba(255,0,85,0.4); font-family: 'Montserrat';}
         .save-btn:active { transform: scale(0.98); }
     </style>
 </head>
@@ -203,7 +200,7 @@
         <div id="flash"></div>
         <div id="finale-screen">
             <div class="neon-heart"></div>
-            <h1 class="title" style="font-size: 4rem; text-shadow: 0 0 20px #ff0055; margin-bottom: 20px;" id="couple-name">Nazlı & Alperen</h1>
+            <h1 class="title" style="font-size: clamp(2.2rem, 6vw, 3.5rem); text-shadow: 0 0 20px #ff0055; margin-bottom: 15px;" id="couple-name">Nazlı & Alperen</h1>
             <div class="typewriter-text" id="typewriter"></div>
             <button id="go-app-btn">Bizim Paneline Gitmek İçin Tıkla ❤️</button>
         </div>
@@ -217,7 +214,7 @@
             </header>
 
             <div class="timer-wrapper">
-                <div class="timer-title"><i class="fas fa-infinity" style="font-size:1.1rem;"></i> Seninle Geçen Zamanımız</div>
+                <div class="timer-title"><i class="fas fa-infinity" style="font-size:1rem;"></i> Seninle Geçen Zamanımız</div>
                 <div class="timer-grid">
                     <div class="t-box"><div class="t-num" id="t-d">0</div><div class="t-lbl">Gün</div></div>
                     <div class="t-box"><div class="t-num" id="t-h">00</div><div class="t-lbl">Saat</div></div>
@@ -298,7 +295,7 @@
         let width, height, particles = [];
         function initCanvas() {
             width = canvas.width = window.innerWidth; height = canvas.height = window.innerHeight; particles = [];
-            for(let i=0; i<100; i++) particles.push({ x: Math.random()*width, y: Math.random()*height, r: Math.random()*2+0.5, vy: -(Math.random()*0.4+0.1), alpha: Math.random() });
+            for(let i=0; i<80; i++) particles.push({ x: Math.random()*width, y: Math.random()*height, r: Math.random()*2+0.5, vy: -(Math.random()*0.3+0.1), alpha: Math.random() });
         }
         function drawCanvas() {
             ctx.clearRect(0,0,width,height);
@@ -321,14 +318,14 @@
             pathFill.style.width = (step/totalSteps)*100 + '%'; nazli.style.left = (step/totalSteps)*48 + '%'; alperen.style.right = (step/totalSteps)*48 + '%';
             if(step <= 5) { document.getElementById('dot-'+step).classList.add('active'); sub.innerText = msgs[step-1]; }
             if(step < 5) gBtn.innerText = btnTxts[step];
-            nazli.style.transform = `translateX(-50%) translateY(-20px) scale(1.1)`; alperen.style.transform = `translateX(50%) translateY(-20px) scale(1.1)`;
+            nazli.style.transform = `translateX(-50%) translateY(-15px) scale(1.1)`; alperen.style.transform = `translateX(50%) translateY(-15px) scale(1.1)`;
             setTimeout(() => { nazli.style.transform = `translateX(-50%) translateY(0) scale(1)`; alperen.style.transform = `translateX(50%) translateY(0) scale(1)`; }, 300);
 
             if(step === totalSteps) {
                 gBtn.style.opacity = 0; sub.style.color = "var(--primary)";
                 setTimeout(() => {
                     nazli.style.display='none'; alperen.style.display='none'; hug.style.display='block';
-                    setTimeout(() => hug.style.transform='translateX(-50%) scale(1.4)', 50);
+                    setTimeout(() => hug.style.transform='translateX(-50%) scale(1.3)', 50);
                     setTimeout(() => { document.getElementById('flash').style.opacity=1; setTimeout(() => { document.getElementById('game-screen').style.display='none'; document.getElementById('finale-screen').style.display='flex'; document.getElementById('flash').style.opacity=0; setTimeout(startTypewriter, 1000); }, 1000); }, 1200);
                 }, 500);
             }
@@ -337,7 +334,7 @@
         const letter = "Benim canım sevgilim, güzel prensesim Nazlı'm...^Bu gördüğün sadece bir oyun değil, bizim sonsuz dijital dünyamızın kapısı.^Seninle geçtiğimiz yollar, izlediğimiz filmler, anılarımız... Hepsi burada sonsuza dek kalacak.^Bizim aşkımız hiç bitmeyecek, saniyeler hiç durmayacak...^^~ Alperen ~";
         let cIdx = 0; const twBox = document.getElementById('typewriter');
         function startTypewriter() {
-            if(cIdx < letter.length) { twBox.innerHTML += (letter.charAt(cIdx)==='^') ? '<br>' : letter.charAt(cIdx); cIdx++; setTimeout(startTypewriter, (letter.charAt(cIdx)==='.'||letter.charAt(cIdx)===',') ? 350 : 45); } 
+            if(cIdx < letter.length) { twBox.innerHTML += (letter.charAt(cIdx)==='^') ? '<br>' : letter.charAt(cIdx); cIdx++; setTimeout(startTypewriter, (letter.charAt(cIdx)==='.'||letter.charAt(cIdx)===',') ? 350 : 40); } 
             else { setTimeout(() => { const goBtn = document.getElementById('go-app-btn'); goBtn.style.display='inline-block'; setTimeout(() => goBtn.style.opacity=1, 50); }, 1000); }
         }
 
@@ -385,7 +382,7 @@
             if(tabId === 'map' && mapInstance) setTimeout(() => mapInstance.invalidateSize(), 100);
         }
 
-        // İllüstrasyon / Atlas Tarzı Harita (Esri World Topo)
+        // İllüstrasyon / Atlas Tarzı Harita
         function initLeafletMap() {
             if(mapInstance) return;
             mapInstance = L.map('map-container', { zoomControl: false, scrollWheelZoom: false, dragging: false, touchZoom: false, doubleClickZoom: false }).setView([38.2950, 26.3150], 11);
@@ -408,11 +405,11 @@
             loveDB.places.forEach((p, i) => {
                 const marker = L.marker([p.lat, p.lng], { icon: pinIcon, draggable: true });
                 
-                // İsimler SADECE ÜZERİNE BASINCA / ÜZERİNE GELİNCE ÇIKAR
+                // İsimler SADECE ÜZERİNE BASINCA / TIKLAYINCA ÇIKAR
                 marker.bindTooltip(`<b>${p.name}</b>`, {
-                    permanent: false, // Sadece hover/click
+                    permanent: false,
                     direction: 'top',
-                    offset: [0,-10],
+                    offset: [0,-8],
                     className: 'custom-tooltip'
                 });
 
@@ -481,14 +478,14 @@
                                 <div class="action-icon delete" onclick="deleteItem('note', ${i})"><i class="fas fa-trash"></i></div>
                             </div>
                             ${n.img ? `<img src="${n.img}">` : `<div class="no-img" style="color:#ffb3c6;"><i class="fas fa-heart"></i></div>`}
-                            <div class="card-body"><div class="card-title">${n.title}</div>${n.desc ? `<div class="card-desc">${n.desc}</div>` : ''}<small style="display:block; margin-top:5px; color:var(--primary); font-size:0.7rem;">${n.date}</small></div>
+                            <div class="card-body"><div class="card-title">${n.title}</div>${n.desc ? `<div class="card-desc">${n.desc}</div>` : ''}<small style="display:block; margin-top:4px; color:var(--primary); font-size:0.65rem;">${n.date}</small></div>
                         </div>`;
                 }
             }
         }
 
         window.deleteItem = function(type, index) {
-            if(confirm("Silmek istediğine emin misin?")) {
+            if(confirm("Bunu silmek istediğine emin misin?")) {
                 if(type === 'movie') loveDB.movies.splice(index, 1);
                 if(type === 'note') loveDB.notes.splice(index, 1);
                 saveDB(); renderGrids();
@@ -536,7 +533,7 @@
                 document.getElementById('modal-title').innerHTML = '<i class="fas fa-map-marker-alt"></i> Haritaya Yer Ekle';
                 document.getElementById('lbl-title').innerText = "Mekanın Adı";
                 document.getElementById('grp-desc').style.display = 'none'; document.getElementById('grp-img').style.display = 'none';
-                if(!latlng) tempLatLng = { lat: 38.3230, lng: 26.3070 };
+                if(!latlng) tempLatLng = { lat: 38.3230, lng: 26.3070 }; 
             } else {
                 document.getElementById('grp-desc').style.display = 'block'; document.getElementById('grp-img').style.display = 'block';
             }
