@@ -32,7 +32,7 @@
 
         #bg-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; background: radial-gradient(circle at center, #240016 0%, #05000a 100%); pointer-events: none; }
 
-        /* GİRİŞ OYUNU & MOBİL UYUMLU BAŞLIKLAR */
+        /* GİRİŞ OYUNU */
         #intro-wrapper { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; transition: opacity 1s ease; display: flex; flex-direction: column; justify-content: center; align-items: center; }
         #game-screen, #finale-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 15px; }
         #finale-screen { display: none; z-index: 12; text-align: center; }
@@ -82,10 +82,13 @@
         #app-dashboard { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 50; display: none; opacity: 0; flex-direction: column; background: transparent; transition: opacity 1s ease; }
         .app-container { display: flex; flex-direction: column; height: 100%; width: 100%; max-width: 900px; margin: 0 auto; background: rgba(0,0,0,0.3); box-shadow: 0 0 50px rgba(0,0,0,0.8); position: relative; overflow: hidden; }
 
-        header { padding: 8px 12px; text-align: center; background: rgba(15,0,10,0.85); backdrop-filter: blur(15px); border-bottom: 1px solid var(--glass-border); z-index: 100; box-shadow: 0 5px 20px rgba(0,0,0,0.5); flex-shrink: 0; }
+        header { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: rgba(15,0,10,0.85); backdrop-filter: blur(15px); border-bottom: 1px solid var(--glass-border); z-index: 100; box-shadow: 0 5px 20px rgba(0,0,0,0.5); flex-shrink: 0; }
         header h1 { font-family: 'Dancing Script', cursive; font-size: 1.6rem; background: linear-gradient(45deg, #ff0055, #ff99cc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin:0; filter: drop-shadow(0 0 6px rgba(255,0,85,0.4));}
 
-        /* KÜÇÜLTÜLMÜŞ SAYAÇ (Her ekrana kusursuz sığar) */
+        /* BULUT BAĞLANTI DURUM BUTONU */
+        #cloud-btn { background: rgba(255,0,85,0.2); border: 1px solid var(--primary); color: #ffb3c6; padding: 5px 10px; border-radius: 12px; font-size: 0.7rem; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 5px; transition: 0.3s; }
+        #cloud-btn:hover { background: var(--primary); color: #fff; }
+
         .timer-wrapper { padding: 8px 12px; text-align: center; background: linear-gradient(to bottom, rgba(255,0,85,0.08), transparent); border-bottom: 1px solid var(--glass-border); z-index: 10; flex-shrink: 0; }
         .timer-title { font-size: 0.75rem; color: #ffccd5; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 6px; font-weight: 600; display:flex; justify-content:center; align-items:center; gap:6px;}
         .timer-grid { display: flex; justify-content: center; gap: 6px; max-width: 450px; margin: 0 auto;}
@@ -108,16 +111,11 @@
 
         /* HARİTA ALANI */
         #map-container { 
-            flex: 1; 
-            width: 100%; 
-            height: auto; 
-            min-height: 0; 
-            border-radius: 14px; 
-            overflow: hidden; 
+            flex: 1; width: 100%; height: auto; min-height: 0; 
+            border-radius: 14px; overflow: hidden; 
             border: 2px solid rgba(255, 0, 85, 0.4); 
             box-shadow: 0 8px 25px rgba(0,0,0,0.6), 0 0 15px rgba(255,0,85,0.15); 
-            z-index: 1;
-            background: #eef2e6;
+            z-index: 1; background: #eef2e6;
         }
         
         .leaflet-tile { filter: saturate(2.2) contrast(1.15) brightness(1.02); }
@@ -131,7 +129,7 @@
         .leaflet-tooltip-top:before { border-top-color: rgba(20,0,10,0.9); }
         .leaflet-popup-content-wrapper, .leaflet-popup-tip { background: rgba(255,255,255,0.95); border: 1px solid var(--primary); color: #333; backdrop-filter: blur(10px); text-align: center; border-radius: 10px;}
 
-        /* KARTLAR VE DÜZENLE/SİL İKONLARI */
+        /* KARTLAR */
         .data-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; padding-bottom: 20px; }
         @media(min-width: 600px) { .data-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); } .t-num { font-size: 1.5rem; } }
         
@@ -211,6 +209,7 @@
         <div class="app-container">
             <header>
                 <h1>Bizim Dünyamız</h1>
+                <div id="cloud-btn" onclick="handleCloudAction()"><i class="fas fa-cloud"></i> <span id="cloud-txt">Bağlantı Kur</span></div>
             </header>
 
             <div class="timer-wrapper">
@@ -343,9 +342,14 @@
             setTimeout(() => { document.getElementById('intro-wrapper').style.display='none'; const app = document.getElementById('app-dashboard'); app.style.display='flex'; initAppSystem(); setTimeout(() => { document.getElementById('flash').style.opacity=0; app.style.opacity=1; if(mapInstance) mapInstance.invalidateSize(); }, 500); }, 1000);
         });
 
-        // Veritabanı ve Sayaç
+        // ==========================================
+        // BULUT SENKRONİZASYON VE VERİTABANI MOTORU
+        // ==========================================
         let loveDB = { movies: [], notes: [], places: [] };
         let mapInstance = null; let routeLayers = null; let mapMarkers = L.layerGroup(); let isDrawingMap = false;
+        
+        let cloudId = new URLSearchParams(window.location.search).get('id') || localStorage.getItem('NazliAlperenCloudID');
+        if(cloudId) localStorage.setItem('NazliAlperenCloudID', cloudId);
 
         const defaultPlaces = [
             { name: "Pırlanta Plajı", lat: 38.3150, lng: 26.2290 }, { name: "Altınkum Plajı", lat: 38.2676, lng: 26.2731 },
@@ -356,11 +360,86 @@
         ];
 
         function initAppSystem() {
-            const savedDB = localStorage.getItem('NazliAlperenDB'); if(savedDB) loveDB = JSON.parse(savedDB);
-            if(!loveDB.places || loveDB.places.length === 0) { loveDB.places = defaultPlaces; saveDB(); }
-            startNeverEndingTimer(); initLeafletMap(); renderGrids();
+            const savedDB = localStorage.getItem('NazliAlperenDB'); 
+            if(savedDB) loveDB = JSON.parse(savedDB);
+            if(!loveDB.places || loveDB.places.length === 0) { loveDB.places = defaultPlaces; }
+            
+            startNeverEndingTimer(); 
+            initLeafletMap(); 
+            renderGrids();
+            updateCloudUI();
+
+            if(cloudId) {
+                syncFromCloud();
+                // Her 5 saniyede bir buluttan güncellemeleri kontrol et (Canlı Senkronizasyon)
+                setInterval(syncFromCloud, 5000);
+            }
         }
-        function saveDB() { localStorage.setItem('NazliAlperenDB', JSON.stringify(loveDB)); }
+
+        async function syncFromCloud() {
+            if(!cloudId) return;
+            try {
+                let res = await fetch(`https://jsonblob.com/api/jsonBlob/${cloudId}`, { headers: { 'Accept': 'application/json' } });
+                if(res.ok) {
+                    let remoteData = await res.json();
+                    if(remoteData && remoteData.places) {
+                        loveDB = remoteData;
+                        localStorage.setItem('NazliAlperenDB', JSON.stringify(loveDB));
+                        renderGrids();
+                        if(mapInstance) drawMapElements();
+                    }
+                }
+            } catch(e) { console.log("Bulut senkronizasyon beklemede..."); }
+        }
+
+        async function saveDB() {
+            localStorage.setItem('NazliAlperenDB', JSON.stringify(loveDB));
+            if(cloudId) {
+                try {
+                    await fetch(`https://jsonblob.com/api/jsonBlob/${cloudId}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                        body: JSON.stringify(loveDB)
+                    });
+                } catch(e) { console.log("Buluta kaydedilemedi"); }
+            }
+        }
+
+        async function handleCloudAction() {
+            if(!cloudId) {
+                if(confirm("Ortak bulut bağlantısı kurulsun mu? Bu sayede Nazlı ile aynı anda ortak verileri görebileceksiniz.")) {
+                    try {
+                        let res = await fetch('https://jsonblob.com/api/jsonBlob', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                            body: JSON.stringify(loveDB)
+                        });
+                        let loc = res.headers.get('Location');
+                        if(loc) {
+                            let parts = loc.split('/');
+                            let newId = parts[parts.length - 1];
+                            if(newId) {
+                                localStorage.setItem('NazliAlperenCloudID', newId);
+                                window.location.href = window.location.pathname + '?id=' + newId;
+                            }
+                        }
+                    } catch(e) { alert("Bağlantı kurulamadı."); }
+                }
+            } else {
+                prompt("Bu bağlantı linkini kopyala ve Nazlı'ya gönder. Bu linke giren herkes sizinle aynı verileri görecek:", window.location.href);
+            }
+        }
+
+        function updateCloudUI() {
+            const btnTxt = document.getElementById('cloud-txt');
+            if(cloudId) {
+                btnTxt.innerText = "Senkronize";
+                document.getElementById('cloud-btn').style.borderColor = "#00ff88";
+                document.getElementById('cloud-btn').style.color = "#00ff88";
+            } else {
+                btnTxt.innerText = "Bağlantı Kur";
+            }
+        }
 
         function startNeverEndingTimer() {
             let startDateStr = localStorage.getItem('NazliAlperenStartDate');
@@ -382,7 +461,7 @@
             if(tabId === 'map' && mapInstance) setTimeout(() => mapInstance.invalidateSize(), 100);
         }
 
-        // İllüstrasyon / Atlas Tarzı Harita
+        // Harita Motoru
         function initLeafletMap() {
             if(mapInstance) return;
             mapInstance = L.map('map-container', { zoomControl: false, scrollWheelZoom: false, dragging: false, touchZoom: false, doubleClickZoom: false }).setView([38.2950, 26.3150], 11);
@@ -404,15 +483,7 @@
 
             loveDB.places.forEach((p, i) => {
                 const marker = L.marker([p.lat, p.lng], { icon: pinIcon, draggable: true });
-                
-                // İsimler SADECE ÜZERİNE BASINCA / TIKLAYINCA ÇIKAR
-                marker.bindTooltip(`<b>${p.name}</b>`, {
-                    permanent: false,
-                    direction: 'top',
-                    offset: [0,-8],
-                    className: 'custom-tooltip'
-                });
-
+                marker.bindTooltip(`<b>${p.name}</b>`, { permanent: false, direction: 'top', offset: [0,-8], className: 'custom-tooltip' });
                 marker.bindPopup(`<div style="font-family:'Montserrat'; padding:5px; text-align:center;"><b style="color:#ff0055">${p.name}</b><br><button onclick="deletePlace(${i})" style="margin-top:5px; width:100%; padding:5px; background:rgba(255,0,85,0.1); border:1px solid #ff0055; color:#ff0055; border-radius:8px; cursor:pointer; font-weight:bold;">Sil</button></div>`);
                 marker.on('dragend', function(e) { const pos = e.target.getLatLng(); loveDB.places[i].lat = pos.lat; loveDB.places[i].lng = pos.lng; saveDB(); drawMapElements(); });
                 mapMarkers.addLayer(marker);
@@ -446,7 +517,7 @@
         function fallbackDirectLine(o) { let ll = o.map(p => [p.lat, p.lng]); let pA = L.polyline(ll, { color: '#ff0055', weight: 3, opacity: 0.9, className: 'neon-route-thin' }); routeLayers.addLayer(pA); routeLayers.addTo(mapInstance); }
         window.deletePlace = function(i) { loveDB.places.splice(i, 1); saveDB(); drawMapElements(); mapInstance.closePopup(); };
 
-        // Kartlar ve Düzenle/Sil
+        // Kartlar
         function renderGrids() {
             const mGrid = document.getElementById('movie-grid'), nGrid = document.getElementById('note-grid');
             mGrid.innerHTML = ''; nGrid.innerHTML = '';
