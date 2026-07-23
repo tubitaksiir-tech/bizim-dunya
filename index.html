@@ -338,12 +338,24 @@
         });
 
         // ==========================================
-        // OTOMATİK BULUT SENKRONİZASYON MOTORU
+        // OTOMATİK ORTAK BULUT ODA MOTORU (DETERMINISTIC UUID)
         // ==========================================
         let loveDB = { movies: [], notes: [], places: [] };
         let mapInstance = null; let routeLayers = null; let mapMarkers = L.layerGroup(); let isDrawingMap = false;
         
-        let cloudId = new URLSearchParams(window.location.search).get('id') || localStorage.getItem('NazliAlperenCloudID');
+        // Bu sabit string sayesinde ikiniz de her zaman aynı bulut veritabanına bağlanırsınız
+        function getDeterministicBlobId(str) {
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                hash = ((hash << 5) - hash) + str.charCodeAt(i);
+                hash |= 0;
+            }
+            let h = Math.abs(hash).toString(16);
+            while(h.length < 32) h += h;
+            return `${h.substr(0,8)}-${h.substr(8,4)}-4${h.substr(12,3)}-a${h.substr(15,3)}-${h.substr(18,12)}`;
+        }
+        
+        const cloudId = getDeterministicBlobId("nazli-ve-alperen-sonsuz-dunyAMIZ-2026-sabit-oda");
 
         const defaultPlaces = [
             { name: "Pırlanta Plajı", lat: 38.3150, lng: 26.2290 }, { name: "Altınkum Plajı", lat: 38.2676, lng: 26.2731 },
@@ -354,39 +366,13 @@
         ];
 
         async function initAppSystem() {
-            // Eğer URL'de ID yoksa ve daha önce bulut ID oluşturulmadıysa otomatik yeni oda kur
-            if(!cloudId) {
-                try {
-                    let res = await fetch('https://jsonblob.com/api/jsonBlob', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                        body: JSON.stringify({ movies: [], notes: [], places: defaultPlaces })
-                    });
-                    let loc = res.headers.get('Location');
-                    if(loc) {
-                        let parts = loc.split('/');
-                        cloudId = parts[parts.length - 1];
-                        if(cloudId) {
-                            localStorage.setItem('NazliAlperenCloudID', cloudId);
-                            window.history.replaceState({}, '', window.location.pathname + '?id=' + cloudId);
-                        }
-                    }
-                } catch(e) { console.log("Otomatik bulut kurulamadı, yerel mod."); }
-            }
-
-            if(cloudId) {
-                localStorage.setItem('NazliAlperenCloudID', cloudId);
-                await syncFromCloudFirstTime();
-                setInterval(syncFromCloud, 4000); // Canlı senkronizasyon
-            } else {
-                const savedDB = localStorage.getItem('NazliAlperenDB'); 
-                if(savedDB) loveDB = JSON.parse(savedDB);
-                if(!loveDB.places || loveDB.places.length === 0) loveDB.places = defaultPlaces;
-            }
-
+            await syncFromCloudFirstTime();
             startNeverEndingTimer(); 
             initLeafletMap(); 
             renderGrids();
+
+            // Arka planda her 4 saniyede bir otomatik senkronizasyon (Sayfayı yenilediğinde veya açıkken anında görürsünüz)
+            setInterval(syncFromCloud, 4000);
         }
 
         async function syncFromCloudFirstTime() {
@@ -397,23 +383,29 @@
                     if(remoteData && remoteData.places) {
                         loveDB = remoteData;
                     }
+                } else {
+                    // Eğer bulutta ilk kez kuruluyorsa varsayılan verileri yükle
+                    loveDB = { movies: [], notes: [], places: defaultPlaces };
+                    await saveDB();
                 }
-            } catch(e) {}
-            if(!loveDB.places || loveDB.places.length === 0) loveDB.places = defaultPlaces;
+            } catch(e) {
+                const savedDB = localStorage.getItem('NazliAlperenDB'); 
+                if(savedDB) loveDB = JSON.parse(savedDB);
+                if(!loveDB.places || loveDB.places.length === 0) loveDB.places = defaultPlaces;
+            }
             renderGrids();
             if(mapInstance) drawMapElements();
         }
 
         async function syncFromCloud() {
-            if(!cloudId) return;
             try {
                 let res = await fetch(`https://jsonblob.com/api/jsonBlob/${cloudId}`, { headers: { 'Accept': 'application/json' } });
                 if(res.ok) {
                     let remoteData = await res.json();
                     if(remoteData && remoteData.places) {
-                        // Veride değişiklik varsa güncelle
                         if(JSON.stringify(remoteData) !== JSON.stringify(loveDB)) {
                             loveDB = remoteData;
+                            localStorage.setItem('NazliAlperenDB', JSON.stringify(loveDB));
                             renderGrids();
                             if(mapInstance) drawMapElements();
                         }
@@ -424,15 +416,13 @@
 
         async function saveDB() {
             localStorage.setItem('NazliAlperenDB', JSON.stringify(loveDB));
-            if(cloudId) {
-                try {
-                    await fetch(`https://jsonblob.com/api/jsonBlob/${cloudId}`, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                        body: JSON.stringify(loveDB)
-                    });
-                } catch(e) {}
-            }
+            try {
+                await fetch(`https://jsonblob.com/api/jsonBlob/${cloudId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify(loveDB)
+                });
+            } catch(e) {}
         }
 
         function startNeverEndingTimer() {
